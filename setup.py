@@ -9,7 +9,7 @@ with open(str(Path(__file__).parent / 'README.md'), 'r', encoding='utf-8') as f:
 with open(str(Path(__file__).parent / 'requirements.txt'), 'r') as f:
     dependencies = f.read().split('\n')
 
-extra_dependencies = ['jupyter', 'scikit-learn', 'ffmpeg-python', 'kornia']
+extra_dependencies = ['jupyter']
 
 setup(
     name='calib',
@@ -22,7 +22,6 @@ setup(
     description=description,
     long_description=readme,
     long_description_content_type="text/markdown",
-#     url='https://github.com/cvg/pixloc/',
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License",
