@@ -10,3 +10,4 @@ omegaconf
 tensorboard
 joblib
 albumentations
+torchmetrics
