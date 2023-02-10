@@ -198,7 +198,7 @@ def plot_row(dict_list_main, pred_annotate=['roll', 'rho', 'fov'], titles=[]):
             texts3.append({'idx': j, 'text': f"fov (pred): {dict_list[j]['pred_fov']:.3f}°", 
                            'pos':(0.01, 0.85), 'fs':15, 'color': '#00ff00', 'lcolor':'k', 'lwidth':2})
         if 'k1_hat' in pred_annotate:
-            texts4.append({'idx': j, 'text': f"k1_hat (pred): {(dict_list[j]['pred_k1_hat']):.3f}°", 
+            texts4.append({'idx': j, 'text': f"k1_hat (pred): {(dict_list[j]['pred_k1_hat']):.3f}", 
                            'pos':(0.01, 0.78), 'fs':15, 'color': '#00ff00', 'lcolor':'k', 'lwidth':2})
 
     plot_images(ims, titles=titles)
