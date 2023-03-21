@@ -38,6 +38,8 @@ python create_split.py
 <img width="500" alt="dataset2_examples" src="https://user-images.githubusercontent.com/30126243/226637738-0fa8b885-07e0-457e-95f1-c0668ade03c5.png">
 
 #### Distributions of parameters in the dataset
+This tells us the intervals of the distibutions in the dataset used for training. If a test image has parameters out of this distribution, the network will fail.
+
 <img width="500" alt="Screenshot 2023-03-21 at 15 30 19" src="https://user-images.githubusercontent.com/30126243/226638352-d9ebf5c9-e9f2-4848-a710-a2b82393f1bd.png">
 
 
@@ -75,6 +77,7 @@ For images that are not square, we resize them to a square before passing it thr
 
 ## Interpreting the neural network
 We also add a notebook (visualize_layercam.ipynb) to visualize the gradients of the network. Before using this, run the following:
+
 ```
 cd class_activation_maps
 python layercam.py -c path/to/config_train.yaml --head roll -e exp12_aspectratio_5heads
