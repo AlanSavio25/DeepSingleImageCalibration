@@ -55,6 +55,7 @@ def plot_images(imgs, titles=None, cmaps='gray', dpi=100, pad=.5,
         if not autoscale:
             ax[i].autoscale(False)
     fig.tight_layout(pad=pad)
+    return plt
 
 
 def plot_keypoints(kpts, colors='lime', ps=6):
@@ -211,3 +212,4 @@ def plot_row(dict_list_main, pred_annotate=['roll', 'rho', 'fov'], titles=[]):
             add_text(**texts3[j])
         if 'k1_hat' in pred_annotate:
             add_text(**texts4[j])
+    return plt

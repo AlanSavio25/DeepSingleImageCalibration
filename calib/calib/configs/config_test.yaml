@@ -8,17 +8,16 @@ data:
   batch_size: 1
   augment: true
 model:
-  name: densenet # convnext
-  model: densenet161 # convnext_tiny
+  name: densenet
+  model: densenet161
   heads:
   - roll
   - rho
-  - fov
+  - vfov
+#   - hfov
   - k1_hat
   normalize_features: true
   duplicate_optimizer_per_scale: true
   normalize_dt: false
-  loss: NLL # L1, L2, Huber, NLL
+  loss: NLL
   num_bins: 256
-  
-  

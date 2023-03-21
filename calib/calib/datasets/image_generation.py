@@ -1,7 +1,6 @@
 import numpy as np
 from calib.calib.datasets.spherical_distortion import *
 from glob import glob
-import numpy as np
 from imageio import imread, imsave
 from scipy.stats import cauchy, lognorm, norm, uniform, truncnorm
 import json
@@ -16,8 +15,8 @@ from numpy.random import seed
 # random.seed(1)
 # np.random.seed(1)
 
-INPUT_DIR = "/cluster/project/infk/cvg/students/alpaul/SUN360/total/"
-OUTPUT_DIR = "/cluster/project/infk/cvg/students/alpaul/DeepSingleImageCalibration/data8/"
+INPUT_DIR = "./SUN360/total/"
+OUTPUT_DIR = "./calibration_dataset/"
 
 all_panoramas = glob(INPUT_DIR + "*", recursive=False)
 # selected_panoramas = np.random.choice(all_panoramas, size=250, replace=False)
@@ -29,11 +28,8 @@ ranges = {
     "yaw": [0, 2 * np.pi],
     "tau": [0.15, 0.85],
     "k1": [-0.3, 0.],
-    "aspect_ratio": [1/1, 5/4, 4/5, 4/3, 3/4, 3/2, 2/3, 16/9, 9/16]
+    "aspect_ratio": [np.log(9/16), np.log(16/9)] # log to make it symmetric around aspect ratio 1:1
 }
-
-aspect_ratio_probs = [0.09, 0.005, 0.005, 0.33, 0.33, 0.1, 0.1, 0.02, 0.02]
-
 
 def max_radius(a, b):
     discrim = a * a - 4 * b
@@ -55,8 +51,7 @@ def image_generator(pano):
     seed()
 
     # Get aspect ratios
-    aspect_ratios = np.random.choice(
-        ranges["aspect_ratio"], num_samples, p=aspect_ratio_probs)
+    aspect_ratios = np.exp(np.random.uniform(low=ranges["aspect_ratio"][0], high=ranges["aspect_ratio"][1], size=num_samples))
     heights = np.empty(num_samples)
     widths = np.empty(num_samples)
     # select height and width such that smaller side = 224
@@ -108,26 +103,44 @@ def image_generator(pano):
     for i in range(num_samples):
         min_permissible_rmax = np.sqrt(
             (heights[i] / 2)**2 + (widths[i] / 2)**2)  # distance to image corner
-        r_max = brown_max_radius(k1[i], 0)
+        r_max = brown_max_radius(k1=k1[i], k2=0)
         # r_max_im = f_px * r_max * (1 + k1*r_max**2)
         # function of r_max_im: f_px = r_max_im / (r_max * (1 + k1*r_max**2))
         lowest_possible_f_px = min_permissible_rmax / \
             (r_max * (1 + k1[i] * r_max**2))
-        lowest_possible_f_ratio = lowest_possible_f_px / heights[i]
-        lowest_a, a, b = (lowest_possible_f_ratio - my_mean) / \
-            my_std, (myclip_a - my_mean) / \
-            my_std, (myclip_b - my_mean) / my_std
-        f_ratio_height[i] = truncnorm.rvs(max(lowest_a, a), b,
-                                          loc=my_mean, scale=my_std)
-        f_px[i] = f_ratio_height[i] * heights[i]
-        f_ratio_width[i] = f_px[i] / widths[i]
-        vfov[i] = 2 * np.arctan(1 / (2 * f_ratio_height[i]))
-        hfov[i] = 2 * np.arctan(1 / (2 * f_ratio_width[i]))
+        if aspect_ratios[i] >= 1.: # landscape, so sample hfov and scale vfov using ar
+            lowest_possible_f_ratio = lowest_possible_f_px / widths[i]
+            lowest_a, a, b = (lowest_possible_f_ratio - my_mean) / \
+                my_std, (myclip_a - my_mean) / \
+                my_std, (myclip_b - my_mean) / my_std
+            f_ratio_width[i] = truncnorm.rvs(max(lowest_a, a), b,
+                                              loc=my_mean, scale=my_std)
+            f_px[i] = f_ratio_width[i] * widths[i]
+            hfov[i] = 2 * np.arctan(1 / (2 * f_ratio_width[i]))
+            
+            f_ratio_height[i] = f_px[i] / heights[i]
+            vfov[i] = 2 * np.arctan(1 / (2 * f_ratio_height[i]))
+
+            
+        else: # portrait
+            lowest_possible_f_ratio = lowest_possible_f_px / heights[i]
+            lowest_a, a, b = (lowest_possible_f_ratio - my_mean) / \
+                my_std, (myclip_a - my_mean) / \
+                my_std, (myclip_b - my_mean) / my_std
+            f_ratio_height[i] = truncnorm.rvs(max(lowest_a, a), b,
+                                              loc=my_mean, scale=my_std)
+            f_px[i] = f_ratio_height[i] * heights[i]
+            vfov[i] = 2 * np.arctan(1 / (2 * f_ratio_height[i]))
+            f_ratio_width[i] = f_px[i] / widths[i]
+            hfov[i] = 2 * np.arctan(1 / (2 * f_ratio_width[i]))
+            
+            assert f_ratio_height[i] >= lowest_possible_f_ratio, \
+            f'{f_ratio_height[i], lowest_possible_f_ratio, max(lowest_possible_f_ratio, myclip_a), }'
+            assert myclip_a <= f_ratio_height[i] <= myclip_b
+
         np.testing.assert_almost_equal(
             vfov[i], 2 * np.arctan((heights[i] * np.tan(hfov[i]/2))/widths[i]))
-        assert f_ratio_height[i] >= lowest_possible_f_ratio, \
-            f'{f_ratio_height[i], lowest_possible_f_ratio, max(lowest_possible_f_ratio, myclip_a), }'
-        assert myclip_a <= f_ratio_height[i] <= myclip_b
+        
     assert len(f_ratio_height) == num_samples
 
     # Setting k1_hat after k1 and f_ratio_height have been sampled
@@ -187,7 +200,7 @@ def image_generator(pano):
 
 
 start_time = time()
-num_jobs = 16  # 16
+num_jobs = 16
 print("Total cpu count: ", int(cpu_count()))
 print("Number of jobs: ", num_jobs)
 

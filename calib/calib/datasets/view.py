@@ -85,48 +85,19 @@ def zero_pad(size, *images):
     return ret
 
 
-# def read_view(conf, image_path: Path, camera: Camera, T_w2cam: Pose,
-#               p3D: np.ndarray, p3D_idxs: np.ndarray, *,
-#               rotation=0, random=False):
-
-#     img = read_image(image_path, conf.grayscale)
-#     img = img.astype(np.float32)
-#     name = image_path.name
-
-#     # we assume that the pose and camera were already rotated during preprocess
-#     if rotation != 0:
-#         img = np.rot90(img, rotation)
-
-#     if conf.resize:
-#         scales = (1, 1)
-#         if conf.resize_by == 'max':
-#             img, scales = resize(img, conf.resize, fn=max)
-#         elif (conf.resize_by == 'min' or
-#                 (conf.resize_by == 'min_if'
-#                     and min(*img.shape[:2]) < conf.resize)):
-#             img, scales = resize(img, conf.resize, fn=min)
-#         if scales != (1, 1):
-#             camera = camera.scale(scales)
-
-#     if conf.crop:
-#         if conf.optimal_crop:
-#             p2D, valid = camera.world2image(T_w2cam * p3D[p3D_idxs])
-#             p2D = p2D[valid].numpy()
-#             centroid = tuple(p2D.mean(0)) if len(p2D) > 0 else None
-#             random = False
-#         else:
-#             centroid = None
-#         img, camera, bbox = crop(
-#             img, conf.crop, random=random,
-#             camera=camera, return_bbox=True, centroid=centroid)
-#     elif conf.pad:
-#         img, = zero_pad(conf.pad, img)
-#         # we purposefully do not update the image size in the camera object
-
-#     data = {
-#         'name': name,
-#         'image': numpy_image_to_torch(img),
-#         'camera': camera.float(),
-#         'T_w2cam': T_w2cam.float(),
-#     }
-#     return data
+def resize_image(im, resize_method='simple'):
+    if resize_method == 'simple':
+        new_img = cv2.resize(im, (224, 224), interpolation=cv2.INTER_AREA)
+    elif resize_method == 'letterbox':
+        ih, iw, _ = im.shape
+        eh, ew = 224, 224  # expected size
+        scale = min(eh / ih, ew / iw)
+        nh = int(ih * scale)
+        nw = int(iw * scale)
+        image = cv2.resize(im, (nw, nh), interpolation=cv2.INTER_AREA)
+        new_img = np.full((eh, ew, 3), 128, dtype='uint8')
+        # fill new image with the resized image and centered it
+        new_img[(eh - nh) // 2:(eh - nh) // 2 + nh,
+                (ew - nw) // 2:(ew - nw) // 2 + nw,
+                :] = im.copy()
+    return new_img
