@@ -1,24 +1,25 @@
 data:
-  name: external_dataset #calibration_dataset # aachen_dataset # kaggle_rotation_dataset # calibration_dataset # ransac_dataset # 
-  data_dir: data7/
-  train_split: split/train_data7.txt
-  val_split: split/val_data7.txt
-  test_split: split/test_data7.txt
+  name: calibration_dataset 
+  data_dir: calibration_dataset/
+  train_split: split/train_data.txt
+  val_split: split/val_data.txt
+  test_split: split/test_data.txt
   num_workers: 24
   seed: 1
   train_batch_size: 32
   val_batch_size: 1
   test_batch_size: 1
   batch_size: 1
-  transform_idx: #0 #14 #14 # idx 0-14
   augment: true
+  resize_method: simple #or letterbox
 model:
-  name: densenet # convnext
-  model: densenet161 # convnext_tiny
-  heads: # Options: roll, rho, fov, dist
+  name: densenet
+  model: densenet161
+  heads: # Options: roll, rho, hfov, vfov, k1_hat
   - roll
   - rho
-  - fov
+  - vfov
+#   - hfov
   - k1_hat
   normalize_features: true
   duplicate_optimizer_per_scale: true
@@ -27,10 +28,10 @@ model:
   num_bins: 256
 train:
   seed: 0
-  load_experiment: #None #train_roll_data3
-  epochs: 12 # Keep this to about 7 for full training.
+  load_experiment:
+  epochs: 12
   log_every_iter: 20
-  eval_every_iter: 3000 # keep this to about 3-5 times per epoch.
+  eval_every_iter: 3000
   lr: 1.0e-04
   clip_grad: 1.0
   median_metrics:
@@ -43,5 +44,4 @@ train:
 #   - roll/L1_degree_loss
 #   - rho/L1_pitch_degree_loss
 #   - fov/L1_degree_loss
-  
-  
+ 

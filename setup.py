@@ -1,7 +1,7 @@
 from pathlib import Path
 from setuptools import setup
 
-description = ['Training and evaluation of the 2019 Deep Single Image Camera Calibration paper']
+description = ['Training and evaluation of a deep neural network that estimates roll, tilt, focal length, and distortion from a single image']
 
 with open(str(Path(__file__).parent / 'README.md'), 'r', encoding='utf-8') as f:
     readme = f.read()

@@ -48,7 +48,7 @@ def get_bin_centers(device):
     rho_edges = torch.tensor(rho_centers - ((rho_centers[1] - rho_centers[0])/2.),
                              dtype=torch.float64,
                              device=device)
-    fov_centers = np.linspace(55., 105.+(50./(num_bins-1)), num_bins+1)
+    fov_centers = np.linspace(20., 105.+(85./(num_bins-1)), num_bins+1)
     fov_edges = torch.tensor(fov_centers - ((fov_centers[1] - fov_centers[0])/2.),
                              dtype=torch.float64, device=device)
 

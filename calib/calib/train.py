@@ -38,7 +38,7 @@ default_train_conf = {
     'lr_scaling': [(100, ['dampingnet.const'])],
     'eval_every_iter': 1000,  # interval for evaluation on the validation set
     'log_every_iter': 200,  # interval for logging the loss to the console
-    'keep_last_checkpoints': 10,  # keep only the last X checkpoints
+    'keep_last_checkpoints': 7,  # keep only the last X checkpoints
 #     'load_experiment': None,  # initialize the model from a previous experiment
     'median_metrics': [],  # add the median of some metrics
     'best_key': 'loss/total',  # key to use to select the best checkpoint

@@ -116,7 +116,7 @@ class BaseDataset(metaclass=ABCMeta):
         'batch_size': 1, # used for overfit
         'num_threads': 1,
         'seed': 0,
-        'transform_idx': None, # None or idx between 0 and len of the predefined transformations list
+        'resize_method': None,
         'augment': True # augment data for train+val
     }
     default_conf = {}
