@@ -2,7 +2,6 @@ from pathlib import Path
 import numpy as np
 import logging
 import torch
-import json
 from .base_dataset import BaseDataset
 from .view import read_image, numpy_image_to_torch
 import os
@@ -44,7 +43,6 @@ class _Dataset(torch.utils.data.Dataset):
         original_height, original_width = im.shape[:2]
 
         if original_width >= original_height:
-            logging.debug('landscape')
             aspect_ratio = original_width / original_height
             downsampled_width = int(224 * aspect_ratio)
             downsampled_image = cv2.resize(
@@ -59,7 +57,6 @@ class _Dataset(torch.utils.data.Dataset):
             cropped_image_torch = numpy_image_to_torch(cropped_image_numpy)
 
         elif original_height > original_width:
-            logging.debug('portrait')
             aspect_ratio = original_height / original_width
             downsampled_height = int(224 * aspect_ratio)
             downsampled_image = cv2.resize(

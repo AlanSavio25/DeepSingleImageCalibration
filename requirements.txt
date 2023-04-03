@@ -10,3 +10,5 @@ omegaconf
 tensorboard
 joblib
 albumentations
+torchmetrics
+pycolmap

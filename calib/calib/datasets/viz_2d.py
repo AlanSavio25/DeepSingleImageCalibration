@@ -55,6 +55,7 @@ def plot_images(imgs, titles=None, cmaps='gray', dpi=100, pad=.5,
         if not autoscale:
             ax[i].autoscale(False)
     fig.tight_layout(pad=pad)
+    return plt
 
 
 def plot_keypoints(kpts, colors='lime', ps=6):
@@ -190,16 +191,16 @@ def plot_row(dict_list_main, pred_annotate=['roll', 'rho', 'fov'], titles=[]):
             cv2.line(im,(pred_x2,pred_y2),(pred_x1,pred_y1),(255,0,0),2)
 
         if 'roll' in pred_annotate:
-            texts1.append({'idx': j, 'text': f"roll (pred): {pred_angle*180/np.pi:.3f}°", 'pos':(0.01, 0.99), 'fs':15, 'color': '#ff0000', 'lcolor':'k', 'lwidth':2})
+            texts1.append({'idx': j, 'text': f"roll (pred): {pred_angle*180/np.pi:.3f}°", 'pos':(0.01, 0.99), 'fs':15, 'color': '#00ff00', 'lcolor':'k', 'lwidth':2})
         if 'rho' in pred_annotate:
             texts2.append({'idx': j, 'text': f"rho (pred): {dict_list[j]['pred_rho']:.3f} ratio", 
-                           'pos':(0.01, 0.14), 'fs':15, 'color': '#ff0000', 'lcolor':'k', 'lwidth':2})
+                           'pos':(0.01, 0.92), 'fs':15, 'color': '#00ff00', 'lcolor':'k', 'lwidth':2})
         if 'fov' in pred_annotate:
             texts3.append({'idx': j, 'text': f"fov (pred): {dict_list[j]['pred_fov']:.3f}°", 
-                           'pos':(0.01, 0.92), 'fs':15, 'color': '#ff0000', 'lcolor':'k', 'lwidth':2})
-        if 'k1_hat' in pred_annotate:
-            texts4.append({'idx': j, 'text': f"k1_hat (pred): {(dict_list[j]['pred_k1_hat']):.3f}°", 
                            'pos':(0.01, 0.85), 'fs':15, 'color': '#00ff00', 'lcolor':'k', 'lwidth':2})
+        if 'k1_hat' in pred_annotate:
+            texts4.append({'idx': j, 'text': f"k1_hat (pred): {(dict_list[j]['pred_k1_hat']):.3f}", 
+                           'pos':(0.01, 0.78), 'fs':15, 'color': '#00ff00', 'lcolor':'k', 'lwidth':2})
 
     plot_images(ims, titles=titles)
     for j in range(len(ims)):
@@ -209,5 +210,6 @@ def plot_row(dict_list_main, pred_annotate=['roll', 'rho', 'fov'], titles=[]):
             add_text(**texts2[j])
         if 'fov' in pred_annotate:
             add_text(**texts3[j])
-#         if 'k1_hat' in pred_annotate:
-#             add_text(**texts4[j])
+        if 'k1_hat' in pred_annotate:
+            add_text(**texts4[j])
+    return plt
