@@ -9,7 +9,6 @@ import logging
 from omegaconf import OmegaConf
 import omegaconf
 import torch
-from torch._six import string_classes
 from torch.utils.data import DataLoader, Sampler, get_worker_info
 from torch.utils.data._utils.collate import (default_collate_err_msg_format,
                                              np_str_obj_array_pattern)
@@ -71,7 +70,7 @@ def collate(batch):
         return torch.tensor(batch, dtype=torch.float64)
     elif isinstance(elem, int):
         return torch.tensor(batch)
-    elif isinstance(elem, string_classes):
+    elif isinstance(elem, str):
         return batch
     elif isinstance(elem, collections.abc.Mapping):
         return {key: collate([d[key] for d in batch]) for key in elem}
