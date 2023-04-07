@@ -3,7 +3,7 @@ import numpy as np
 import logging
 import torch
 from .base_dataset import BaseDataset
-from .view import read_image, numpy_image_to_torch
+from .view import read_image, numpy_image_to_torch, resize_image
 import os
 import cv2
 
@@ -42,36 +42,37 @@ class _Dataset(torch.utils.data.Dataset):
         im = read_image(Path(path), grayscale=False)
         original_height, original_width = im.shape[:2]
 
-        if original_width >= original_height:
-            aspect_ratio = original_width / original_height
-            downsampled_width = int(224 * aspect_ratio)
-            downsampled_image = cv2.resize(
-                im, (downsampled_width, 224), interpolation=cv2.INTER_AREA)
+#         if original_width >= original_height:
+#             aspect_ratio = original_width / original_height
+#             downsampled_width = int(224 * aspect_ratio)
+#             downsampled_image = cv2.resize(
+#                 im, (downsampled_width, 224), interpolation=cv2.INTER_AREA)
 
-            down_height, down_width = downsampled_image.shape[:2]
-            assert down_height <= down_width
-            start_x = (down_width - down_height) // 2
-            start_y = 0
-            cropped_image_numpy = np.array(
-                downsampled_image[start_y:start_y+down_height, start_x:start_x+down_height])
-            cropped_image_torch = numpy_image_to_torch(cropped_image_numpy)
+#             down_height, down_width = downsampled_image.shape[:2]
+#             assert down_height <= down_width
+#             start_x = (down_width - down_height) // 2
+#             start_y = 0
+#             cropped_image_numpy = np.array(
+#                 downsampled_image[start_y:start_y+down_height, start_x:start_x+down_height])
+#             cropped_image_torch = numpy_image_to_torch(cropped_image_numpy)
 
-        elif original_height > original_width:
-            aspect_ratio = original_height / original_width
-            downsampled_height = int(224 * aspect_ratio)
-            downsampled_image = cv2.resize(
-                im, (224, downsampled_height), interpolation=cv2.INTER_AREA)
+#         elif original_height > original_width:
+#             aspect_ratio = original_height / original_width
+#             downsampled_height = int(224 * aspect_ratio)
+#             downsampled_image = cv2.resize(
+#                 im, (224, downsampled_height), interpolation=cv2.INTER_AREA)
 
-            down_height, down_width = downsampled_image.shape[:2]
-            assert down_width <= down_height
-            start_x = 0
-            start_y = (down_height - down_width) // 2
-            cropped_image_numpy = np.array(
-                downsampled_image[start_y:start_y+down_width, start_x:start_x+down_width])
-            cropped_image_torch = numpy_image_to_torch(cropped_image_numpy)
+#             down_height, down_width = downsampled_image.shape[:2]
+#             assert down_width <= down_height
+#             start_x = 0
+#             start_y = (down_height - down_width) // 2
+#             cropped_image_numpy = np.array(
+#                 downsampled_image[start_y:start_y+down_width, start_x:start_x+down_width])
+#             cropped_image_torch = numpy_image_to_torch(cropped_image_numpy)
 
-        assert cropped_image_torch.shape[1] == cropped_image_torch.shape[2] == 224
-
+#         assert cropped_image_torch.shape[1] == cropped_image_torch.shape[2] == 224
+        im = numpy_image_to_torch(resize_image(im, resize_method=self.conf.resize_method))
+    
         data = {
             'image': cropped_image_torch,
             **item,

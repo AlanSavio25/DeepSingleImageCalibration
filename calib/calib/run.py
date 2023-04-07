@@ -78,6 +78,8 @@ def main():
         results.append({ **result, 'image': data['image'].numpy().squeeze(0).transpose((1, 2, 0))})
         pd.DataFrame(result).T.to_csv(Path(results_dir,str(Path(data['path'][0]).stem)+'.csv'), header=False, index=True)
     for i in range(len(results)):
-        p = plot_row([results[i]], pred_annotate=['roll','rho', 'fov', 'k1_hat'], titles=[d['path'][0].split('/')[-1] for d in results])
+        p = plot_row([results[i]], pred_annotate=['roll','rho', 'fov', 'k1_hat'], titles=[])
         p.savefig(results_dir + results[i]['path'][0].split('/')[-1])
-    
+
+if __name__ == '__main__':
+    main()
