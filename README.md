@@ -33,11 +33,11 @@ wget https://github.com/AlanSavio25/DeepSingleImageCalibration/releases/download
 Then, you can run inference using:
 
 ```
-python calib.calib.run --img_dir imagedir
+python calib.calib.run --img_dir imagedir --weights_dir weights
 ```
-This results in annotated images along with json results stored in `results/images`.
+This results in annotated images along with prediction results stored in `results/images`.
 
-For a quick setup where you don't need to install anything, navigate to the Colab page linked above. Here, you can add your images and test the network by following the instructions.
+For a quick setup for testing, navigate to the Colab page linked at the top of this page. Here, you can add your images and test the network by following the instructions.
 
 ## Trained Network Weights
 
