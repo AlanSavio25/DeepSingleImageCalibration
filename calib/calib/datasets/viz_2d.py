@@ -13,6 +13,7 @@ import numpy as np
 from copy import deepcopy
 import math
 import cv2
+from calib.calib.datasets.view import read_image, resize_image
 
 def cm_RdGn(x):
     """Custom colormap: red (0) -> yellow (0.5) -> green (1)."""
@@ -182,10 +183,10 @@ def plot_row(dict_list_main, pred_annotate=['roll', 'rho', 'fov'], titles=[]):
         ims.append(im)
         if 'roll' in pred_annotate or 'rho' in pred_annotate:
             pred_angle = dict_list[j]['pred_roll']*np.pi/180 if 'roll' in pred_annotate else 0
-            distorted_offset = dict_list[j]['pred_rho'] * 224 if 'rho' in pred_annotate else 0 # height = 224
+            distorted_offset = dict_list[j]['pred_rho']  * im.shape[0] if 'rho' in pred_annotate else 0
             radius = 5000
-            pred_centrex = 112
-            pred_centrey = 112 - distorted_offset
+            pred_centrex = int(round(im.shape[1]/2))
+            pred_centrey = int(round(im.shape[0]/2)) - distorted_offset
             pred_x1 = math.floor(math.cos(pred_angle) * radius + pred_centrex)
             pred_y1 = math.floor(math.sin(pred_angle) * radius + pred_centrey)
             pred_x2 = math.ceil(math.cos(pred_angle+np.pi) * radius + pred_centrex)

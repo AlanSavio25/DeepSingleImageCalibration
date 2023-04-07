@@ -85,9 +85,9 @@ def zero_pad(size, *images):
     return ret
 
 
-def resize_image(im, resize_method='simple'):
+def resize_image(im, resize_method='simple', width=224, height=224):
     if resize_method == 'simple':
-        new_img = cv2.resize(im, (224, 224), interpolation=cv2.INTER_AREA)
+        new_img = cv2.resize(im, (width, height), interpolation=cv2.INTER_AREA)
     elif resize_method == 'letterbox':
         ih, iw, _ = im.shape
         eh, ew = 224, 224  # expected size
