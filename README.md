@@ -35,6 +35,7 @@ Then, you can run inference using:
 ```
 python calib.calib.run --img_dir imagedir
 ```
+This results in annotated images along with json results stored in `results/images`.
 
 For a quick setup where you don't need to install anything, navigate to the Colab page linked above. Here, you can add your images and test the network by following the instructions.
 
