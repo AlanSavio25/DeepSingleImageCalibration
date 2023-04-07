@@ -177,6 +177,8 @@ def plot_row(dict_list_main, pred_annotate=['roll', 'rho', 'fov'], titles=[]):
     texts8 = []
     for j in range(len(dict_list)):
         im = np.ascontiguousarray(dict_list[j]['image'] * 255, dtype=np.uint8)
+        original_im_shape = cv2.imread(dict_list[j]['path'][0]).shape
+        im = resize_image(im, width=480, height=480*int(round(original_im_shape[0]/original_im_shape[1])))
         ims.append(im)
         if 'roll' in pred_annotate or 'rho' in pred_annotate:
             pred_angle = dict_list[j]['pred_roll']*np.pi/180 if 'roll' in pred_annotate else 0
