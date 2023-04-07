@@ -7,12 +7,12 @@
 
 
 
-In this project, we release our neural network that estimate from a single image its roll, tilt (parameterized by offset of horizon from image centre), focal length (parameterized by field of view), and radial distortion parameter k1 (parameterized by k1_hat where k1 and focal length are decoupled).
+In this repository, we release our neural network that can estimate from a single image (!) the camera's roll, tilt (parameterized by offset of horizon from image centre), focal length (parameterized by field of view), and radial distortion parameter k1 (parameterized by k1_hat where k1 and focal length are decoupled).
 
 This work is closest to the paper [Deep Single Image Camera Calibration With Radial Distortion](https://openaccess.thecvf.com/content_CVPR_2019/html/Lopez_Deep_Single_Image_Camera_Calibration_With_Radial_Distortion_CVPR_2019_paper.html) and 
 [DeepCalib: a deep learning approach for automatic intrinsic calibration of wide field-of-view cameras](https://dl.acm.org/doi/10.1145/3278471.3278479)
 
-## Install ⚙️
+## Installation ⚙️
 
 This project requires Python>=3.6 and PyTorch>1.1. The following steps will install the `calib` package using `setup.py` and `requirements.txt`. 
 
