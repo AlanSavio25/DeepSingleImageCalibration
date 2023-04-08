@@ -19,6 +19,8 @@ This project requires Python>=3.6 and PyTorch>1.1. The following steps will inst
 ```bash
 git clone git@github.com:AlanSavio25/DeepSingleImageCalibration.git
 cd DeepSingleImageCalibration
+python -m venv venv
+source venv/bin/activate
 pip install -e .
 ```
 
@@ -33,7 +35,7 @@ wget https://github.com/AlanSavio25/DeepSingleImageCalibration/releases/download
 Then, you can run inference using:
 
 ```
-python calib.calib.run --img_dir imagedir --weights_dir weights
+python -m calib.calib.run --img_dir images/ --weights_dir weights
 ```
 This results in annotated images along with prediction results stored in `results/images`.
 
