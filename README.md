@@ -43,7 +43,7 @@ For a quick setup for testing, navigate to the Colab page linked at the top of t
 
 ## Trained Network Weights
 
-[comment]: <> ( Network 1 https://drive.google.com/drive/folders/1DKH6sJBr1WJlUo2kjhpTb8JddwyymcJB) is trained to estimate 3 parameters: roll, rho, field of view.)
+[comment]: <> ( Network 1 https://drive.google.com/drive/folders/1DKH6sJBr1WJlUo2kjhpTb8JddwyymcJB is trained to estimate 3 parameters: roll, rho, field of view.)
 
 1. [Network 1](https://drive.google.com/drive/folders/1DKH6sJBr1WJlUo2kjhpTb8JddwyymcJB) is trained on 1:1 (square) images.
 
