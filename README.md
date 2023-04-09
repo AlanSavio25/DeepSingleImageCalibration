@@ -66,7 +66,7 @@ Then, run the following script to create the train-val-test split:
 
 ```
 mkdir -p split
-python create_split.py
+python -m calib.calib.datasets.create_split
 ```
 
 #### Examples of Images in the generated dataset
