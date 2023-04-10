@@ -41,7 +41,6 @@ class _Dataset(torch.utils.data.Dataset):
         item = self.items[idx]
         path = item['path']
         im = read_image(Path(path), grayscale=False)
-        original_height, original_width = im.shape[:2]
         im = numpy_image_to_torch(resize_image(im, resize_method=self.conf.resize_method))
     
         data = {
