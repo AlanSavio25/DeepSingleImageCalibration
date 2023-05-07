@@ -19,7 +19,6 @@ def calib(image_path=None):
         torch.hub.download_url_to_file('https://github.com/AlanSavio25/DeepSingleImageCalibration/releases/download/v1/checkpoint_best.tar', 
                 'weights/checkpoint_best.tar', hash_prefix='a84cb9606931529bab33524b15cbfd7370b4d7593e2849b3f1dac0b9b3dd2583')
     model = load_experiment('weights', {'name': 'densenet'})
-    output['model'] = model
 
     if image_path is not None:
 
@@ -81,8 +80,8 @@ def calib(image_path=None):
             'k1_hat': k1_hat
             })
 
-    return output
+    return model, output
 
 
 if __name__=='__main__':
-    print(calib(image_path='images/video1.-00150.jpg'))
+    print(calib(image_path='images/video1-00150.jpg'))
