@@ -5,11 +5,13 @@
 <img src="https://user-images.githubusercontent.com/30126243/230651370-de68f3c9-bd8e-4e21-8234-472e07d3f4a6.gif" width="125"/><img src="https://user-images.githubusercontent.com/30126243/230651374-d993b0a6-eac6-48c9-8468-1720c87236f6.gif" width="125"/><img src="https://user-images.githubusercontent.com/30126243/230651395-dbb3dfd2-ae15-44d9-aedf-51934e6a60bb.gif" width="125"/>
 </p>
 
-
-
 In this repository, we release our neural network that can estimate from a single image (!) the camera's roll, tilt (parameterized by offset of horizon from image centre), focal length (parameterized by field of view), and radial distortion parameter k1 (parameterized by k1_hat where k1 and focal length are decoupled).
 
-This work is closest to the paper [Deep Single Image Camera Calibration With Radial Distortion](https://openaccess.thecvf.com/content_CVPR_2019/html/Lopez_Deep_Single_Image_Camera_Calibration_With_Radial_Distortion_CVPR_2019_paper.html) and 
+This project is done as a Master's Semester Thesis at the Computer Vision and Geometry group at ETH Zürich.
+- [Slides](https://drive.google.com/file/d/19JGO14GoO7sqz_E3dvfNSKOX_YodMooM/view?usp=share_link)
+- [Report.pdf](https://drive.google.com/file/d/11yikMCx_9WoCRsjSbp-hUSNsC6xiGbTg/view?usp=share_link)
+
+Our work builds upon the papers [Deep Single Image Camera Calibration With Radial Distortion](https://openaccess.thecvf.com/content_CVPR_2019/html/Lopez_Deep_Single_Image_Camera_Calibration_With_Radial_Distortion_CVPR_2019_paper.html) and 
 [DeepCalib: a deep learning approach for automatic intrinsic calibration of wide field-of-view cameras](https://dl.acm.org/doi/10.1145/3278471.3278479)
 
 ## Installation ⚙️
