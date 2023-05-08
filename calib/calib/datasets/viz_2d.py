@@ -15,12 +15,6 @@ import math
 import cv2
 from calib.calib.datasets.view import read_image, resize_image
 
-def cm_RdGn(x):
-    """Custom colormap: red (0) -> yellow (0.5) -> green (1)."""
-    x = np.clip(x, 0, 1)[..., None]*2
-    c = x*np.array([[0, 1., 0]]) + (2-x)*np.array([[1., 0, 0]])
-    return np.clip(c, 0, 1)
-
 
 def plot_images(imgs, titles=None, cmaps='gray', dpi=100, pad=.5,
                 adaptive=True, autoscale=True):
@@ -74,48 +68,6 @@ def plot_keypoints(kpts, colors='lime', ps=6):
             a.scatter(k[:, 0], k[:, 1], c=c, s=ps, linewidths=0)
 
 
-def plot_matches(kpts0, kpts1, color=None, lw=1.5, ps=4, indices=(0, 1), a=1.):
-    """Plot matches for a pair of existing images.
-    Args:
-        kpts0, kpts1: corresponding keypoints of size (N, 2).
-        color: color of each match, string or RGB tuple. Random if not given.
-        lw: width of the lines.
-        ps: size of the end points (no endpoint if ps=0)
-        indices: indices of the images to draw the matches on.
-        a: alpha opacity of the match lines.
-    """
-    fig = plt.gcf()
-    ax = fig.axes
-    assert len(ax) > max(indices)
-    ax0, ax1 = ax[indices[0]], ax[indices[1]]
-    fig.canvas.draw()
-
-    assert len(kpts0) == len(kpts1)
-    if color is None:
-        color = matplotlib.cm.hsv(np.random.rand(len(kpts0))).tolist()
-    elif len(color) > 0 and not isinstance(color[0], (tuple, list)):
-        color = [color] * len(kpts0)
-
-    if lw > 0:
-        # transform the points into the figure coordinate system
-        transFigure = fig.transFigure.inverted()
-        fkpts0 = transFigure.transform(ax0.transData.transform(kpts0))
-        fkpts1 = transFigure.transform(ax1.transData.transform(kpts1))
-        fig.lines += [matplotlib.lines.Line2D(
-            (fkpts0[i, 0], fkpts1[i, 0]), (fkpts0[i, 1], fkpts1[i, 1]),
-            zorder=1, transform=fig.transFigure, c=color[i], linewidth=lw,
-            alpha=a)
-            for i in range(len(kpts0))]
-
-    # freeze the axes to prevent the transform to change
-    ax0.autoscale(enable=False)
-    ax1.autoscale(enable=False)
-
-    if ps > 0:
-        ax0.scatter(kpts0[:, 0], kpts0[:, 1], c=color, s=ps)
-        ax1.scatter(kpts1[:, 0], kpts1[:, 1], c=color, s=ps)
-
-
 def add_text(idx, text, pos=(0.01, 0.99), fs=15, color='w',
              lcolor='k', lwidth=2):
     ax = plt.gcf().axes[idx]
@@ -164,6 +116,7 @@ def features_to_RGB(*Fs, skip=1):
     assert flatten.shape[0] == 0
     return Fs
 
+
 def plot_row(dict_list_main, pred_annotate=['roll', 'rho', 'fov'], titles=[]):
     dict_list = deepcopy(dict_list_main)
 
@@ -179,31 +132,38 @@ def plot_row(dict_list_main, pred_annotate=['roll', 'rho', 'fov'], titles=[]):
     for j in range(len(dict_list)):
         im = np.ascontiguousarray(dict_list[j]['image'] * 255, dtype=np.uint8)
         original_im_shape = cv2.imread(dict_list[j]['path'][0]).shape
-        im = resize_image(im, width=int(round(original_im_shape[1]/4)), height=int(round(original_im_shape[0]/4)))
+        im = resize_image(im, width=int(
+            round(original_im_shape[1]/4)), height=int(round(original_im_shape[0]/4)))
         ims.append(im)
         if 'roll' in pred_annotate or 'rho' in pred_annotate:
-            pred_angle = dict_list[j]['pred_roll']*np.pi/180 if 'roll' in pred_annotate else 0
-            distorted_offset = dict_list[j]['pred_rho']  * im.shape[0] if 'rho' in pred_annotate else 0
+            pred_angle = dict_list[j]['pred_roll'] * \
+                np.pi/180 if 'roll' in pred_annotate else 0
+            distorted_offset = dict_list[j]['pred_rho'] * \
+                im.shape[0] if 'rho' in pred_annotate else 0
             radius = 5000
             pred_centrex = int(round(im.shape[1]/2))
             pred_centrey = int(round(im.shape[0]/2)) - distorted_offset
             pred_x1 = math.floor(math.cos(pred_angle) * radius + pred_centrex)
             pred_y1 = math.floor(math.sin(pred_angle) * radius + pred_centrey)
-            pred_x2 = math.ceil(math.cos(pred_angle+np.pi) * radius + pred_centrex)
-            pred_y2 = math.ceil(math.sin(pred_angle+np.pi) * radius + pred_centrey)
-            cv2.line(im,(pred_x2,pred_y2),(pred_x1,pred_y1),(255,0,0),2)
+            pred_x2 = math.ceil(math.cos(pred_angle+np.pi)
+                                * radius + pred_centrex)
+            pred_y2 = math.ceil(math.sin(pred_angle+np.pi)
+                                * radius + pred_centrey)
+            cv2.line(im, (pred_x2, pred_y2),
+                     (pred_x1, pred_y1), (255, 0, 0), 2)
 
         if 'roll' in pred_annotate:
-            texts1.append({'idx': j, 'text': f"roll (pred): {pred_angle*180/np.pi:.3f}°", 'pos':(0.01, 0.99), 'fs':15, 'color': '#00ff00', 'lcolor':'k', 'lwidth':2})
+            texts1.append({'idx': j, 'text': f"roll (pred): {pred_angle*180/np.pi:.3f}°",
+                          'pos': (0.01, 0.99), 'fs': 15, 'color': '#00ff00', 'lcolor': 'k', 'lwidth': 2})
         if 'rho' in pred_annotate:
-            texts2.append({'idx': j, 'text': f"rho (pred): {dict_list[j]['pred_rho']:.3f} ratio", 
-                           'pos':(0.01, 0.92), 'fs':15, 'color': '#00ff00', 'lcolor':'k', 'lwidth':2})
+            texts2.append({'idx': j, 'text': f"rho (pred): {dict_list[j]['pred_rho']:.3f} ratio",
+                           'pos': (0.01, 0.92), 'fs': 15, 'color': '#00ff00', 'lcolor': 'k', 'lwidth': 2})
         if 'fov' in pred_annotate:
-            texts3.append({'idx': j, 'text': f"fov (pred): {dict_list[j]['pred_fov']:.3f}°", 
-                           'pos':(0.01, 0.85), 'fs':15, 'color': '#00ff00', 'lcolor':'k', 'lwidth':2})
+            texts3.append({'idx': j, 'text': f"fov (pred): {dict_list[j]['pred_fov']:.3f}°",
+                           'pos': (0.01, 0.85), 'fs': 15, 'color': '#00ff00', 'lcolor': 'k', 'lwidth': 2})
         if 'k1_hat' in pred_annotate:
-            texts4.append({'idx': j, 'text': f"k1_hat (pred): {(dict_list[j]['pred_k1_hat']):.3f}", 
-                           'pos':(0.01, 0.78), 'fs':15, 'color': '#00ff00', 'lcolor':'k', 'lwidth':2})
+            texts4.append({'idx': j, 'text': f"k1_hat (pred): {(dict_list[j]['pred_k1_hat']):.3f}",
+                           'pos': (0.01, 0.78), 'fs': 15, 'color': '#00ff00', 'lcolor': 'k', 'lwidth': 2})
 
     plot_images(ims, titles=titles)
     for j in range(len(ims)):
