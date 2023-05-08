@@ -20,7 +20,7 @@ Our work builds upon the papers [Deep Single Image Camera Calibration With Radia
 We provide a one-liner in `quick.py` that allows you to calibrate any single image without any required installations.
 ```
 model, results, plt = torch.hub.load('AlanSavio25/DeepSingleImageCalibration',
-                            'calib', image_path='path/to/image', force_reload=True)
+                                     'calib', image_path='path/to/image')
 ```
 Under the hood, this performs the required image pre-processing, network inference, and post-processing to derive all the calibration parameters from the network's outputs.
 
@@ -66,7 +66,7 @@ For a quick setup for testing, navigate to the Colab page linked at the top of t
 
 ### Dataset
 
-We used the [SUN360](https://drive.google.com/drive/folders/1ooaYwvNuFd-iEEcmOQHpLunJEmo7b4NM) dataset to obtain 360° panoramas, from which we generated 274,072 images. We use a train-val-test split of 264,072 - 5000 - 2000. To generate these images, first combine all SUN360 images into one directory `SUN360/total/`, then run:
+We used the SUN360 dataset to obtain 360° panoramas, from which we generated 274,072 images. We use a train-val-test split of 264,072 - 5000 - 2000. To generate these images, first combine all SUN360 images into one directory `SUN360/total/`, then run:
 
 ```bash
 cd calib/calib/datasets/
