@@ -8,11 +8,21 @@
 In this repository, we release our neural network that can estimate from a single image (!) the camera's roll, tilt (parameterized by offset of horizon from image centre), focal length (parameterized by field of view), and radial distortion parameter k1 (parameterized by k1_hat where k1 and focal length are decoupled).
 
 This project is done as a Master's Semester Thesis at the Computer Vision and Geometry group at ETH Zürich.
-- [Slides](https://drive.google.com/file/d/19JGO14GoO7sqz_E3dvfNSKOX_YodMooM/view?usp=share_link)
-- [Report.pdf](https://drive.google.com/file/d/11yikMCx_9WoCRsjSbp-hUSNsC6xiGbTg/view?usp=share_link)
+- [Slides](https://drive.google.com/file/d/15QomHVEmNaq0wvnOjQPLZlnAlU9tvMlH/view?usp=share_link)
+- [Report.pdf](https://drive.google.com/file/d/1cEFN1oRmT08Sysqz4idrk84Aww7Q5Swj/view?usp=share_link)
 
 Our work builds upon the papers [Deep Single Image Camera Calibration With Radial Distortion](https://openaccess.thecvf.com/content_CVPR_2019/html/Lopez_Deep_Single_Image_Camera_Calibration_With_Radial_Distortion_CVPR_2019_paper.html) and 
 [DeepCalib: a deep learning approach for automatic intrinsic calibration of wide field-of-view cameras](https://dl.acm.org/doi/10.1145/3278471.3278479)
+
+
+## Quick Start 🚀
+
+We provide a one-liner in `quick.py` that allows you to calibrate any single image without any required installations.
+```
+model, results, plt = torch.hub.load('AlanSavio25/DeepSingleImageCalibration',
+                            'calib', image_path='path/to/image', force_reload=True)
+```
+Under the hood, this performs the required image pre-processing, network inference, and post-processing to derive all the calibration parameters from the network's outputs.
 
 ## Installation ⚙️
 
@@ -72,13 +82,16 @@ python -m calib.calib.datasets.create_split
 ```
 
 #### Examples of Images in the generated dataset
+<p align="center">
 <img align="center" width="500" alt="dataset2_examples" src="https://user-images.githubusercontent.com/30126243/226637738-0fa8b885-07e0-457e-95f1-c0668ade03c5.png">
+</p>
 
 #### Distributions of parameters in the dataset
 This shows the intervals of the distibutions in the dataset used for training. If a test image has parameters out of this distribution, the network will fail.
 
-<img width="500" alt="Screenshot 2023-03-21 at 15 30 19" src="https://user-images.githubusercontent.com/30126243/226638352-d9ebf5c9-e9f2-4848-a710-a2b82393f1bd.png">
-
+<p align="center">
+<img align="center" width="500" alt="Screenshot 2023-03-21 at 15 30 19" src="https://user-images.githubusercontent.com/30126243/226638352-d9ebf5c9-e9f2-4848-a710-a2b82393f1bd.png">
+</p>
 
 ### Training experiment
 
@@ -103,6 +116,7 @@ python layercam.py -c path/to/config_train.yaml --head roll -e exp12_aspectratio
 ```
 We adapt code from [here](https://github.com/utkuozbulak/pytorch-cnn-visualizations).
 
-<img width="500" alt="Screenshot 2023-03-21 at 17 07 10" src="https://user-images.githubusercontent.com/30126243/226669347-a263b86b-d76e-4ca5-b2a9-37746880f5ef.png">
-
+<p align="center">
+<img align="center" width="500" alt="Screenshot 2023-03-21 at 17 07 10" src="https://user-images.githubusercontent.com/30126243/226669347-a263b86b-d76e-4ca5-b2a9-37746880f5ef.png">
+</p>
 Notice that the network focuses on straight lines and horizons.
