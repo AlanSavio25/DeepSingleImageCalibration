@@ -1,10 +1,12 @@
-dependencies = ['torch', 'os', 'cv2', 'pycolmap', 'numpy']
-import torch
-from calib.calib.utils.experiments import load_experiment
-import os
-import cv2
-import pycolmap
+from calib.calib.datasets.view import read_image, numpy_image_to_torch, resize_image
+from calib.calib.datasets.viz_2d import plot_row
 import numpy as np
+import pycolmap
+import cv2
+import os
+from calib.calib.utils.experiments import load_experiment
+import torch
+dependencies = ['torch', 'os', 'cv2', 'pycolmap', 'numpy']
 
 
 def calib(image_path=None):
@@ -16,28 +18,30 @@ def calib(image_path=None):
     output = {}
     if not os.path.exists('./weights/checkpoint_best.tar'):
         os.system('mkdir -p weights')
-        torch.hub.download_url_to_file('https://github.com/AlanSavio25/DeepSingleImageCalibration/releases/download/v1/checkpoint_best.tar', 
-                'weights/checkpoint_best.tar', hash_prefix='a84cb9606931529bab33524b15cbfd7370b4d7593e2849b3f1dac0b9b3dd2583')
+        torch.hub.download_url_to_file('https://github.com/AlanSavio25/DeepSingleImageCalibration/releases/download/v1/checkpoint_best.tar',
+                                       'weights/checkpoint_best.tar', hash_prefix='a84cb9606931529bab33524b15cbfd7370b4d7593e2849b3f1dac0b9b3dd2583')
     model = load_experiment('weights', {'name': 'densenet'})
+    plt = None
 
     if image_path is not None:
 
-        im = cv2.imread(image_path, cv2.IMREAD_COLOR)
+        im = read_image(image_path, grayscale=False)
         h, w, _ = im.shape
-        im = cv2.resize(im, (224, 224), interpolation=cv2.INTER_AREA)
-        im = im.transpose((2, 0, 1))  # HxWxC to CxHxW
-        im = torch.from_numpy(im / 255.).float().unsqueeze(0)
+        im = numpy_image_to_torch(resize_image(im)).unsqueeze(0)
         pred = model({'image': im})
-        
+
         num_bins = 256
-        roll_centers = torch.linspace(-45.0, 45.0+(90./(num_bins-1)), num_bins+1)
+        roll_centers = torch.linspace(-45.0,
+                                      45.0+(90./(num_bins-1)), num_bins+1)
         rho_centers = torch.linspace(-1., 1.+(2./(num_bins-1)), num_bins+1)
         fov_centers = torch.linspace(20., 105.+(85./(num_bins-1)), num_bins+1)
-        k1_hat_centers = torch.linspace(-0.45, 0.+(0.45/(num_bins-1)), num_bins+1)
+        k1_hat_centers = torch.linspace(-0.45,
+                                        0.+(0.45/(num_bins-1)), num_bins+1)
         roll_edges = (roll_centers - ((roll_centers[1] - roll_centers[0])/2.))
         rho_edges = (rho_centers - ((rho_centers[1] - rho_centers[0])/2.))
         fov_edges = (fov_centers - ((fov_centers[1] - fov_centers[0])/2.))
-        k1_hat_edges = (k1_hat_centers - ((k1_hat_centers[1] - k1_hat_centers[0])/2.))
+        k1_hat_edges = (k1_hat_centers -
+                        ((k1_hat_centers[1] - k1_hat_centers[0])/2.))
 
         roll = (roll_centers[pred['roll'].argmax(1)])
         rho = ((rho_centers[pred['rho'].argmax(1)]) * 0.35)
@@ -49,7 +53,7 @@ def calib(image_path=None):
         # Compute pitch from predicted rho
         u0 = h / 2.
         v0 = w / 2.
-        rho_px = rho * h
+        rho_px = rho.cpu().item() * h
 
         img_pts = [u0, rho_px + v0]
         camera = pycolmap.Camera(
@@ -71,17 +75,21 @@ def calib(image_path=None):
 
         pitch = np.arctan(tau/(fy_px/h))
 
-        output.update({'roll_degrees': roll,
-            'distorted_offset_fractionofheight': rho,
-            'pitch': pitch,
-            'vfov_degrees': vfov,
-            'focal_length_pixels': fy_px,
-            'k1': k1,
-            'k1_hat': k1_hat
-            })
+        output.update({'pred_roll': roll,
+                       'pred_rho': rho,
+                       'pitch': pitch,
+                       'pred_fov': vfov,
+                       'focal_length_pixels': fy_px,
+                       'k1': k1,
+                       'pred_k1_hat': k1_hat
+                       })
 
-    return model, output
+        plt = plot_row([{**{k: output[k].unsqueeze(0).cpu().item()
+                          for k in output}, 'image': im.numpy().squeeze(0).transpose((1, 2, 0)), 'path': [image_path]}], pred_annotate=[
+                     'roll', 'rho', 'fov', 'k1_hat'])
+    return model, output, plt
 
 
-if __name__=='__main__':
-    print(calib(image_path='images/video1-00150.jpg'))
+if __name__ == '__main__':
+    _, output, plt = calib(image_path='images/video1-00150.jpg')
+    plt.savefig('image.png')
