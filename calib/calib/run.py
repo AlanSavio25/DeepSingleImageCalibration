@@ -8,6 +8,7 @@ from omegaconf import OmegaConf
 from calib.calib.utils.experiments import load_experiment
 from calib.calib.utils.helper_functions import *
 from calib.calib.datasets.viz_2d import *
+import pycolmap
 import tqdm
 import pandas as pd
 import os
@@ -45,53 +46,75 @@ def main():
 
     for data in tqdm.tqdm(test_loader, desc='Testing', ascii=True, disable=False):
         pred = model(data)
-        output = pred['roll']
-        entropy = compute_categorical_entropy(output)
-        pred['roll_entropy'] = entropy
-        pred_class = output.argmax(1)
-        pred_deg = torch.tensor(
-            roll_centers[pred_class], dtype=torch.float64, device=device)
-        pred['roll'] = pred_deg
+        num_bins = 256
 
-        output = pred['rho']
-        entropy = compute_categorical_entropy(output)
-        pred['rho_entropy'] = entropy
-        pred_class = output.argmax(1)
-        pred_norm_rho = torch.tensor(
-            rho_centers[pred_class], dtype=torch.float64, device=device)
-        pred_ratio_rho = pred_norm_rho * 0.35
-        pred['rho'] = pred_ratio_rho
+        image_path = data['path'][0]
+        im = read_image(image_path, grayscale=False)
+        h, w, _ = im.shape
 
-        output = pred['vfov']
-        entropy = compute_categorical_entropy(output)
-        pred['vfov_entropy'] = entropy
-        pred_class = output.argmax(1)
-        pred_fov_deg = torch.tensor(
-            fov_centers[pred_class], dtype=torch.float64, device=device)
-        pred['fov'] = pred_fov_deg
-        del pred['vfov']
+        roll_centers = torch.linspace(-45.0,
+                                      45.0+(90./(num_bins-1)), num_bins+1)
+        rho_centers = torch.linspace(-1., 1.+(2./(num_bins-1)), num_bins+1)
+        fov_centers = torch.linspace(20., 105.+(85./(num_bins-1)), num_bins+1)
+        k1_hat_centers = torch.linspace(-0.45,
+                                        0.+(0.45/(num_bins-1)), num_bins+1)
+        roll_edges = (roll_centers - ((roll_centers[1] - roll_centers[0])/2.))
+        rho_edges = (rho_centers - ((rho_centers[1] - rho_centers[0])/2.))
+        fov_edges = (fov_centers - ((fov_centers[1] - fov_centers[0])/2.))
+        k1_hat_edges = (k1_hat_centers -
+                        ((k1_hat_centers[1] - k1_hat_centers[0])/2.))
 
-        output = pred['k1_hat']
-        entropy = compute_categorical_entropy(output)
-        pred['k1_hat_entropy'] = entropy
-        pred_class = output.argmax(1)
-        pred_k1_hat = torch.tensor(
-            k1_hat_centers[pred_class], dtype=torch.float64, device=device)
-        pred['k1_hat'] = pred_k1_hat
-        result = {'path': data['path'],
-                  **{'pred_'+str(pred_key): pred[pred_key].unsqueeze(0).cpu().item()
-                      if isinstance(pred[pred_key], torch.Tensor)
-                      else pred[pred_key]
-                      for pred_key in pred}
-                  }
-        results.append(
-            {**result, 'image': data['image'].numpy().squeeze(0).transpose((1, 2, 0))})
-        pd.DataFrame(result).T.to_csv(Path(results_dir, str(
-            Path(data['path'][0]).stem)+'.csv'), header=False, index=True)
-    for i in range(len(results)):
-        p = plot_row([results[i]], pred_annotate=[
-                     'roll', 'rho', 'fov', 'k1_hat'], titles=[])
-        p.savefig(results_dir + results[i]['path'][0].split('/')[-1])
+        roll = (roll_centers[pred['roll'].argmax(1)])
+        rho = ((rho_centers[pred['rho'].argmax(1)]) * 0.35)
+        vfov = (fov_centers[pred['vfov'].argmax(1)])
+        fy_px = 1 / (torch.tan(vfov * (torch.pi/180.) / 2) * 2 / h)
+        k1_hat = (k1_hat_centers[pred['k1_hat'].argmax(1)])
+        k1 = k1_hat * (fy_px/h)**2
+
+        # Compute pitch from predicted rho
+        u0 = h / 2.
+        v0 = w / 2.
+        rho_px = rho.cpu().item() * h
+
+        img_pts = [u0, rho_px + v0]
+        camera = pycolmap.Camera(
+            model='RADIAL',
+            width=w,
+            height=h,
+            params=[fy_px, u0, v0, k1, 0.],
+        )
+        normalized_coords = np.array(camera.image_to_world(img_pts))
+        camera_no_distortion = pycolmap.Camera(
+            model='RADIAL',
+            width=w,
+            height=h,
+            params=[fy_px, u0, v0, 0.0, 0.0],
+        )
+        back_to_image = np.array(
+            camera_no_distortion.world_to_image(normalized_coords))
+        tau = (back_to_image[1] - v0) / h
+
+        pitch = np.arctan(tau/(fy_px/h))
+
+
+        output = {'pred_roll': roll,
+                       'pred_rho': rho,
+                       'pitch': pitch,
+                       'pred_fov': vfov,
+                       'focal_length_pixels': fy_px,
+                       'k1': k1,
+                       'pred_k1_hat': k1_hat
+                 }
+
+        plt = plot_row([{**{k: output[k].unsqueeze(0).cpu().item()
+                          for k in output}, 'image': data['image'].numpy().squeeze(0).transpose((1, 2, 0)), 'path': [image_path]}], pred_annotate=[
+                     'roll', 'rho', 'fov', 'k1_hat'])
+
+        plt.savefig(results_dir + image_path.split('/')[-1])
+
+        pd.DataFrame(output).T.to_csv(Path(results_dir, str(
+            Path(image_path).stem)+'.csv'), header=False, index=True)
+
     logger.info(f"Saved results into {results_dir}")
     
 if __name__ == '__main__':
