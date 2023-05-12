@@ -46,19 +46,12 @@ pip install -e .
 
 ## Inference
 
-Download the weights of the model:
-```
-mkdir weights
-wget https://github.com/AlanSavio25/DeepSingleImageCalibration/releases/download/v1/checkpoint_best.tar -P weights
-```
-SHA256 sum = 'a84cb9606931529bab33524b15cbfd7370b4d7593e2849b3f1dac0b9b3dd2583'
-
-Then, you can run inference using:
+You can run inference using:
 
 ```
-python -m calib.calib.run --img_dir images/ --weights_dir weights
+python -m calib.calib.run --img_dir images/
 ```
-This results in annotated images along with prediction results stored in `results/images`.
+This script downloads the weights and saves the network's prediction results + annotated images in `results/`.
 
 <!-- ## Trained Network Weights
 

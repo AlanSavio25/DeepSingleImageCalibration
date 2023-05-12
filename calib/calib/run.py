@@ -18,14 +18,17 @@ def main():
     parser = argparse.ArgumentParser(prog='Deep Single Image calibration',
                                      description='Inference code to show the predicted camera parameters')
     parser.add_argument('--img_dir', default='images/')
-    parser.add_argument('--weights_dir', default='weights/')
     args = parser.parse_args()
 
+    if not os.path.exists('./weights/checkpoint_best.tar'):
+        os.system('mkdir -p weights')
+        logger.info("Downloading weights into ./weights/")
+        torch.hub.download_url_to_file('https://github.com/AlanSavio25/DeepSingleImageCalibration/releases/download/v1/checkpoint_best.tar',
+                                       'weights/checkpoint_best.tar', hash_prefix='a84cb9606931529bab33524b15cbfd7370b4d7593e2849b3f1dac0b9b3dd2583')
     os.system('mkdir -p ./results/')
-    data_dir = args.img_dir
     results_dir = './results/'
 
-    experiment = args.weights_dir
+    experiment = 'weights'
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     roll_centers, rho_centers, fov_centers, k1_hat_centers = get_bin_centers(
@@ -33,7 +36,7 @@ def main():
     conf = 'calib/calib/configs/config_test.yaml'
     logger.info(f'Starting test {experiment}')
     conf = OmegaConf.merge(OmegaConf.load(
-        conf), {'data': {'data_dir': data_dir}})
+        conf), {'data': {'data_dir': args.img_dir}})
     dataset = get_dataset(conf.data.name)(conf.data)
     test_loader = dataset.get_data_loader('test')
     model = load_experiment(experiment, conf.model).eval()
@@ -89,7 +92,7 @@ def main():
         p = plot_row([results[i]], pred_annotate=[
                      'roll', 'rho', 'fov', 'k1_hat'], titles=[])
         p.savefig(results_dir + results[i]['path'][0].split('/')[-1])
-
-
+    logger.info(f"Saved results into {results_dir}")
+    
 if __name__ == '__main__':
     main()
