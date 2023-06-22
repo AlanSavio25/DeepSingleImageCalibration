@@ -27,8 +27,9 @@ Our work builds upon the papers [Deep Single Image Camera Calibration With Radia
 We provide a one-liner in `quick.py` that allows you run our network to calibrate any single image. The colab notebook has a demo that shows you how to quickly get started.
 ```
 import torch
-model, results, annotated_image = torch.hub.load('AlanSavio25/DeepSingleImageCalibration',
-                                     'calib', image_path='path/to/image')
+calibrator = torch.hub.load('AlanSavio25/DeepSingleImageCalibration', 'calibrator')
+results = calibrator.calibrate(image_array)
+calibrator.visualize(results, image_array)
 ```
 Under the hood, this performs the required image pre-processing, network inference, and post-processing to derive all the calibration parameters from the network's outputs.
 

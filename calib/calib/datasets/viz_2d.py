@@ -117,7 +117,8 @@ def features_to_RGB(*Fs, skip=1):
     return Fs
 
 
-def plot_row(dict_list_main, pred_annotate=['roll', 'rho', 'fov'], titles=[]):
+def plot_row(dict_list_main, pred_annotate=['roll', 'rho', 'fov'], titles=[],
+             **kwargs):
     dict_list = deepcopy(dict_list_main)
 
     ims = []
@@ -130,15 +131,12 @@ def plot_row(dict_list_main, pred_annotate=['roll', 'rho', 'fov'], titles=[]):
     texts7 = []
     texts8 = []
     for j in range(len(dict_list)):
-        im = np.ascontiguousarray(dict_list[j]['image'] * 255, dtype=np.uint8)
-        original_im_shape = cv2.imread(dict_list[j]['path'][0]).shape
-        im = resize_image(im, width=int(
-            round(original_im_shape[1]/4)), height=int(round(original_im_shape[0]/4)))
+        im = dict_list[j]['image']
         ims.append(im)
         if 'roll' in pred_annotate or 'rho' in pred_annotate:
-            pred_angle = dict_list[j]['pred_roll'] * \
+            pred_angle = dict_list[j]['roll'] * \
                 np.pi/180 if 'roll' in pred_annotate else 0
-            distorted_offset = dict_list[j]['pred_rho'] * \
+            distorted_offset = dict_list[j]['rho'] * \
                 im.shape[0] if 'rho' in pred_annotate else 0
             radius = 5000
             pred_centrex = int(round(im.shape[1]/2))
@@ -150,22 +148,22 @@ def plot_row(dict_list_main, pred_annotate=['roll', 'rho', 'fov'], titles=[]):
             pred_y2 = math.ceil(math.sin(pred_angle+np.pi)
                                 * radius + pred_centrey)
             cv2.line(im, (pred_x2, pred_y2),
-                     (pred_x1, pred_y1), (255, 0, 0), 2)
+                     (pred_x1, pred_y1), (255, 0, 0), 10)
 
         if 'roll' in pred_annotate:
             texts1.append({'idx': j, 'text': f"roll (pred): {pred_angle*180/np.pi:.3f}°",
                           'pos': (0.01, 0.99), 'fs': 15, 'color': '#00ff00', 'lcolor': 'k', 'lwidth': 2})
         if 'rho' in pred_annotate:
-            texts2.append({'idx': j, 'text': f"rho (pred): {dict_list[j]['pred_rho']:.3f} ratio",
+            texts2.append({'idx': j, 'text': f"rho (pred): {dict_list[j]['rho']:.3f} ratio",
                            'pos': (0.01, 0.92), 'fs': 15, 'color': '#00ff00', 'lcolor': 'k', 'lwidth': 2})
         if 'fov' in pred_annotate:
-            texts3.append({'idx': j, 'text': f"fov (pred): {dict_list[j]['pred_fov']:.3f}°",
+            texts3.append({'idx': j, 'text': f"fov (pred): {dict_list[j]['vertical_fov']:.3f}°",
                            'pos': (0.01, 0.85), 'fs': 15, 'color': '#00ff00', 'lcolor': 'k', 'lwidth': 2})
-        if 'k1_hat' in pred_annotate:
-            texts4.append({'idx': j, 'text': f"k1_hat (pred): {(dict_list[j]['pred_k1_hat']):.3f}",
+        if 'k1_hat' in pred_annotate and 'k1_hat' in dict_list[0]:
+            texts4.append({'idx': j, 'text': f"k1_hat (pred): {(dict_list[j]['k1_hat']):.3f}",
                            'pos': (0.01, 0.78), 'fs': 15, 'color': '#00ff00', 'lcolor': 'k', 'lwidth': 2})
 
-    plot_images(ims, titles=titles)
+    plot_images(ims, titles=titles, **kwargs)
     for j in range(len(ims)):
         if 'roll' in pred_annotate:
             add_text(**texts1[j])
@@ -173,6 +171,6 @@ def plot_row(dict_list_main, pred_annotate=['roll', 'rho', 'fov'], titles=[]):
             add_text(**texts2[j])
         if 'fov' in pred_annotate:
             add_text(**texts3[j])
-        if 'k1_hat' in pred_annotate:
+        if 'k1_hat' in pred_annotate and 'k1_hat' in dict_list[0]:
             add_text(**texts4[j])
     return plt
