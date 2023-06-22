@@ -61,12 +61,13 @@ def load_experiment(exper, conf={}, get_last=False):
         ckpt = get_last_checkpoint(exper)
     else:
         ckpt = get_best_checkpoint(exper)
-    logger.info(f'Loading checkpoint {ckpt.name}')
+    logger.debug(f'Loading checkpoint {ckpt.name}')
     ckpt = torch.load(str(ckpt), map_location='cpu')
 
     loaded_conf = OmegaConf.create(ckpt['conf'])
     OmegaConf.set_struct(loaded_conf, False)
     conf = OmegaConf.merge(loaded_conf.model, OmegaConf.create(conf))
+    conf.pretrained = False  # prevent downloading weights
     model = get_model(conf.name)(conf).eval()
 
     state_dict = ckpt['model']

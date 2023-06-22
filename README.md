@@ -29,7 +29,7 @@ We provide a one-liner in `quick.py` that allows you run our network to calibrat
 import torch
 calibrator = torch.hub.load('AlanSavio25/DeepSingleImageCalibration', 'calibrator')
 results = calibrator.calibrate(image_array)
-calibrator.visualize(results, image_array)
+calibrator.visualize(image_array, results)
 ```
 Under the hood, this performs the required image pre-processing, network inference, and post-processing to derive all the calibration parameters from the network's outputs.
 

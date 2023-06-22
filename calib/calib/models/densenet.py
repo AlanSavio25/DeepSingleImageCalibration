@@ -59,7 +59,8 @@ class DenseNet(BaseModel):
                                          dtype=torch.float64, device=self.device)
 
         Model = getattr(torchvision.models, conf.model)
-        self.model = Model(pretrained=self.conf.pretrained)
+        weights = 'DEFAULT' if self.conf.pretrained else None
+        self.model = Model(weights=weights)
 
         layers = []
 
